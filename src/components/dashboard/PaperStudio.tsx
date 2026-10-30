@@ -26,6 +26,19 @@ import { MathRenderer } from '@/components/ui/MathRenderer';
 export function PaperStudio() {
   const [activeTab, setActiveTab] = useState<'auto-mock' | 'ai-synthesizer' | 'question-bank' | 'branding'>('auto-mock');
 
+  React.useEffect(() => {
+    const handleHash = () => {
+      const hash = window.location.hash;
+      if (hash === '#question-bank') setActiveTab('question-bank');
+      else if (hash === '#branding') setActiveTab('branding');
+      else if (hash === '#ai-synthesizer') setActiveTab('ai-synthesizer');
+      else if (hash === '#auto-mock' || hash === '#studio') setActiveTab('auto-mock');
+    };
+    handleHash();
+    window.addEventListener('hashchange', handleHash);
+    return () => window.removeEventListener('hashchange', handleHash);
+  }, []);
+
   // AI Synthesizer State
   const [title, setTitle] = useState('IGCSE Physics: Mechanics and Thermodynamics Mock Examination');
   const [subject, setSubject] = useState('Physics');

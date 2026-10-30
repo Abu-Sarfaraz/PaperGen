@@ -102,10 +102,10 @@ export function ResponsiveFooter() {
               </li>
               <li>
                 <Link
-                  href="/admin"
-                  className="hover:text-text-primary transition-colors text-accent-cyan"
+                  href="/#curriculums"
+                  className="hover:text-text-primary transition-colors"
                 >
-                  Admin Control Plane
+                  Cambridge Past Paper Syllabus
                 </Link>
               </li>
             </ul>

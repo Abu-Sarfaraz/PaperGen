@@ -6,12 +6,14 @@ import {
   ArrowUpDown,
   ChevronLeft,
   ChevronRight,
-  ExternalLink,
+  Download,
   CheckCircle2,
   Clock,
   AlertCircle,
   PlayCircle,
+  FileText,
 } from 'lucide-react';
+import { downloadAsPdf } from '@/lib/export/documents';
 
 export interface DeploymentRow {
   id: string;
@@ -27,82 +29,82 @@ export interface DeploymentRow {
 const mockDeployments: DeploymentRow[] = [
   {
     id: 'dep_01',
-    projectName: 'Orbital Mesh Portal',
-    slug: 'orbital-mesh.papergen.space',
-    commitSha: '7dc8e59',
+    projectName: 'Cambridge IGCSE Math 0580 Paper 4 Mock Exam (Orbital Mesh Portal)',
+    slug: 'Cambridge CAIE 0580 • Summer 2024 Extended',
+    commitSha: 'CAIE-0580',
     status: 'completed',
     environment: 'production',
-    duration: '38s',
+    duration: '100 Marks',
     createdAt: '2026-10-30 14:22 UTC',
   },
   {
     id: 'dep_02',
-    projectName: 'Telemetry WebSocket Relay',
-    slug: 'ws-relay.papergen.space',
-    commitSha: 'b066403',
+    projectName: 'Cambridge O-Level 4024 Pure Algebra (Telemetry WebSocket Relay)',
+    slug: 'Cambridge 4024 • Winter 2023 Structured',
+    commitSha: 'CAIE-4024',
     status: 'completed',
     environment: 'production',
-    duration: '42s',
+    duration: '80 Marks',
     createdAt: '2026-10-30 13:10 UTC',
   },
   {
     id: 'dep_03',
-    projectName: 'Multi-Tenant Auth Gateway',
-    slug: 'auth-gateway.papergen.space',
-    commitSha: 'c8814d6',
+    projectName: 'IGCSE Physics 0625 Mechanics & Energy (Multi-Tenant Auth Gateway)',
+    slug: 'Cambridge CAIE 0625 • March 2024 Extended',
+    commitSha: 'CAIE-0625',
     status: 'building',
     environment: 'preview',
-    duration: '21s',
+    duration: '80 Marks',
     createdAt: '2026-10-30 12:45 UTC',
   },
   {
     id: 'dep_04',
-    projectName: 'Stripe Checkout Webhook Pod',
-    slug: 'billing.papergen.space',
-    commitSha: 'e9921f0',
+    projectName: 'IGCSE Chemistry 0620 Stoichiometry (Stripe Checkout Webhook Pod)',
+    slug: 'Cambridge CAIE 0620 • Summer 2023 Theory',
+    commitSha: 'CAIE-0620',
     status: 'completed',
     environment: 'production',
-    duration: '35s',
+    duration: '80 Marks',
     createdAt: '2026-10-30 11:30 UTC',
   },
   {
     id: 'dep_05',
-    projectName: 'Playwright Browser Cluster',
-    slug: 'qa-matrix.papergen.space',
-    commitSha: 'f1103c8',
+    projectName: 'Cambridge IGCSE Biology 0610 Cell Structure (Playwright Browser Cluster)',
+    slug: 'Cambridge CAIE 0610 • Paper 2 Multiple Choice',
+    commitSha: 'CAIE-0610',
     status: 'queued',
     environment: 'preview',
-    duration: '-',
+    duration: '40 Marks',
     createdAt: '2026-10-30 10:15 UTC',
   },
   {
     id: 'dep_06',
-    projectName: 'Deep Space CDN Mirror',
-    slug: 'cdn-mirror.papergen.space',
-    commitSha: 'a445690',
+    projectName: 'O-Level Mathematics D (4024) Trigonometry & Vectors (Deep Space CDN Mirror)',
+    slug: 'Cambridge 4024 • Paper 1 Non-Calculator',
+    commitSha: 'CAIE-4024',
     status: 'completed',
     environment: 'production',
-    duration: '49s',
+    duration: '75 Marks',
     createdAt: '2026-10-29 22:04 UTC',
   },
   {
     id: 'dep_07',
-    projectName: 'Postgres RLS Advisor Monitor',
-    slug: 'rls-audit.papergen.space',
-    commitSha: 'd223019',
+    projectName: 'IGCSE Economics 0455 Macroeconomics Test (Postgres RLS Advisor Monitor)',
+    slug: 'Cambridge CAIE 0455 • Paper 2 Structured',
+    commitSha: 'CAIE-0455',
     status: 'failed',
     environment: 'preview',
-    duration: '18s',
+    duration: '60 Marks',
     createdAt: '2026-10-29 19:40 UTC',
   },
   {
     id: 'dep_08',
-    projectName: 'Spacecraft Sensor Ingestion',
-    slug: 'sensors.papergen.space',
-    commitSha: '9bb4211',
+    projectName: 'Cambridge IGCSE Additional Math 0606 (Spacecraft Sensor Ingestion)',
+    slug: 'Cambridge CAIE 0606 • Paper 1 Pure Mathematics',
+    commitSha: 'CAIE-0606',
     status: 'completed',
     environment: 'production',
-    duration: '52s',
+    duration: '50 Marks',
     createdAt: '2026-10-29 16:18 UTC',
   },
 ];
@@ -118,6 +120,7 @@ export function PaginatedDataTable() {
   const filteredData = useMemo(() => {
     return mockDeployments.filter((item) => {
       const matchesSearch =
+        search === '' ||
         item.projectName.toLowerCase().includes(search.toLowerCase()) ||
         item.commitSha.toLowerCase().includes(search.toLowerCase()) ||
         item.slug.toLowerCase().includes(search.toLowerCase());
@@ -131,19 +134,22 @@ export function PaginatedDataTable() {
 
   const sortedData = useMemo(() => {
     return [...filteredData].sort((a, b) => {
-      const valA = a[sortKey];
-      const valB = b[sortKey];
-      if (valA < valB) return sortAsc ? -1 : 1;
-      if (valA > valB) return sortAsc ? 1 : -1;
+      const aVal = a[sortKey];
+      const bVal = b[sortKey];
+
+      if (aVal < bVal) return sortAsc ? -1 : 1;
+      if (aVal > bVal) return sortAsc ? 1 : -1;
       return 0;
     });
   }, [filteredData, sortKey, sortAsc]);
 
-  const totalPages = Math.ceil(sortedData.length / pageSize) || 1;
+  const totalPages = Math.max(1, Math.ceil(sortedData.length / pageSize));
+  const validCurrentPage = Math.min(currentPage, totalPages);
+
   const paginatedData = useMemo(() => {
-    const start = (currentPage - 1) * pageSize;
-    return sortedData.slice(start, start + pageSize);
-  }, [sortedData, currentPage, pageSize]);
+    const startIndex = (validCurrentPage - 1) * pageSize;
+    return sortedData.slice(startIndex, startIndex + pageSize);
+  }, [sortedData, validCurrentPage, pageSize]);
 
   const handleSort = (key: keyof DeploymentRow) => {
     if (sortKey === key) {
@@ -160,20 +166,20 @@ export function PaginatedDataTable() {
         return (
           <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-pill bg-status-success/15 text-status-success border border-status-success/30 font-mono text-[11px] font-semibold">
             <CheckCircle2 className="w-3.5 h-3.5" />
-            <span>COMPLETED</span>
+            <span>READY</span>
           </span>
         );
       case 'building':
         return (
-          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-pill bg-accent-cyan/15 text-accent-cyan border border-accent-cyan/30 font-mono text-[11px] font-semibold animate-pulse">
-            <PlayCircle className="w-3.5 h-3.5 animate-spin" />
-            <span>BUILDING</span>
+          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-pill bg-accent-purple/15 text-accent-purple border border-accent-purple/30 font-mono text-[11px] font-semibold">
+            <Clock className="w-3.5 h-3.5 animate-spin" />
+            <span>SYNTHESIZING</span>
           </span>
         );
       case 'queued':
         return (
           <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-pill bg-status-warning/15 text-status-warning border border-status-warning/30 font-mono text-[11px] font-semibold">
-            <Clock className="w-3.5 h-3.5" />
+            <PlayCircle className="w-3.5 h-3.5" />
             <span>QUEUED</span>
           </span>
         );
@@ -181,7 +187,7 @@ export function PaginatedDataTable() {
         return (
           <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-pill bg-status-danger/15 text-status-danger border border-status-danger/30 font-mono text-[11px] font-semibold">
             <AlertCircle className="w-3.5 h-3.5" />
-            <span>FAILED</span>
+            <span>ARCHIVED</span>
           </span>
         );
     }
@@ -191,7 +197,7 @@ export function PaginatedDataTable() {
     <div className="glass-panel p-6">
       {/* Controls: Search and Filter */}
       <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mb-6">
-        <div className="relative w-full sm:w-72">
+        <div className="relative w-full sm:w-80">
           <Search className="w-4 h-4 text-text-secondary absolute left-3 top-1/2 -translate-y-1/2" />
           <input
             type="text"
@@ -200,8 +206,8 @@ export function PaginatedDataTable() {
               setSearch(e.target.value);
               setCurrentPage(1);
             }}
-            placeholder="Search projects or commit..."
-            className="w-full pl-9 pr-4 py-2 bg-midnight-900 border border-surface-border rounded-control text-sm text-text-primary placeholder:text-text-secondary focus:outline-none focus:border-accent-purple"
+            placeholder="Search projects or commit / papers..."
+            className="w-full pl-9 pr-4 py-2 bg-midnight-900 border border-surface-border rounded-control text-sm text-text-primary placeholder:text-text-secondary focus:outline-none focus:border-accent-purple font-sans"
           />
         </div>
 
@@ -220,10 +226,10 @@ export function PaginatedDataTable() {
             className="bg-midnight-900 border border-surface-border text-text-primary text-xs rounded-control px-3 py-2 focus:outline-none focus:border-accent-purple font-sans"
           >
             <option value="all">All Statuses</option>
-            <option value="completed">Completed</option>
-            <option value="building">Building</option>
+            <option value="completed">Ready</option>
+            <option value="building">Synthesizing</option>
             <option value="queued">Queued</option>
-            <option value="failed">Failed</option>
+            <option value="failed">Archived</option>
           </select>
         </div>
       </div>
@@ -239,7 +245,7 @@ export function PaginatedDataTable() {
                   onClick={() => handleSort('projectName')}
                   className="flex items-center gap-1.5 hover:text-text-primary"
                 >
-                  <span>Project & Domain</span>
+                  <span>Exam Paper & Syllabus</span>
                   <ArrowUpDown className="w-3.5 h-3.5" />
                 </button>
               </th>
@@ -253,16 +259,16 @@ export function PaginatedDataTable() {
                   <ArrowUpDown className="w-3.5 h-3.5" />
                 </button>
               </th>
-              <th className="py-3 px-4">Commit SHA</th>
-              <th className="py-3 px-4">Env</th>
-              <th className="py-3 px-4">Duration</th>
+              <th className="py-3 px-4">Syllabus Code</th>
+              <th className="py-3 px-4">Format</th>
+              <th className="py-3 px-4">Marks</th>
               <th className="py-3 px-4">
                 <button
                   type="button"
                   onClick={() => handleSort('createdAt')}
                   className="flex items-center gap-1.5 hover:text-text-primary"
                 >
-                  <span>Timestamp</span>
+                  <span>Generated Date</span>
                   <ArrowUpDown className="w-3.5 h-3.5" />
                 </button>
               </th>
@@ -273,7 +279,7 @@ export function PaginatedDataTable() {
             {paginatedData.length === 0 ? (
               <tr>
                 <td colSpan={7} className="py-8 text-center text-text-secondary">
-                  No telemetry deployments matched your query.
+                  No examination papers matched your search criteria.
                 </td>
               </tr>
             ) : (
@@ -283,16 +289,17 @@ export function PaginatedDataTable() {
                   className="hover:bg-surface-glass/40 transition-colors"
                 >
                   <td className="py-3.5 px-4">
-                    <div className="font-display font-semibold text-text-primary">
-                      {row.projectName}
+                    <div className="font-display font-semibold text-text-primary flex items-center gap-2">
+                      <FileText className="w-4 h-4 text-accent-purple shrink-0" />
+                      <span>{row.projectName}</span>
                     </div>
-                    <div className="font-mono text-xs text-text-secondary">
+                    <div className="font-mono text-xs text-text-secondary pl-6">
                       {row.slug}
                     </div>
                   </td>
                   <td className="py-3.5 px-4">{getStatusBadge(row.status)}</td>
                   <td className="py-3.5 px-4">
-                    <span className="font-mono text-xs px-2 py-0.5 rounded bg-midnight-900 border border-surface-border text-accent-purple">
+                    <span className="font-mono text-xs px-2 py-0.5 rounded bg-midnight-900 border border-surface-border text-accent-cyan font-semibold">
                       {row.commitSha}
                     </span>
                   </td>
@@ -304,7 +311,7 @@ export function PaginatedDataTable() {
                           : 'bg-midnight-900 text-text-secondary'
                       }`}
                     >
-                      {row.environment}
+                      {row.environment === 'production' ? 'PDF & DOCX' : 'Draft'}
                     </span>
                   </td>
                   <td className="py-3.5 px-4 font-mono text-xs text-text-secondary">
@@ -316,10 +323,17 @@ export function PaginatedDataTable() {
                   <td className="py-3.5 px-4 text-right">
                     <button
                       type="button"
-                      className="p-1.5 text-text-secondary hover:text-accent-cyan hover:bg-surface-glass rounded transition-colors"
-                      title="Inspect Live Deployment"
+                      onClick={() => {
+                        downloadAsPdf(
+                          `# ${row.projectName}\n\n**Curriculum Details:** ${row.slug}\n**Code:** ${row.commitSha}\n**Total Marks:** ${row.duration}\n\n## Section A: Examination Questions\n[Official Cambridge past paper questions and sub-parts]\n\n## Section B: Mark Scheme\n[Official Cambridge marking scheme]`,
+                          row.projectName.replace(/[^a-zA-Z0-9]/g, '_').slice(0, 30)
+                        );
+                      }}
+                      className="px-2.5 py-1 text-xs text-accent-cyan hover:text-white bg-accent-purple/20 hover:bg-accent-purple border border-accent-purple/40 rounded transition-all inline-flex items-center gap-1.5 font-sans font-medium"
+                      title="Download Exam Paper PDF"
                     >
-                      <ExternalLink className="w-4 h-4" />
+                      <Download className="w-3.5 h-3.5" />
+                      <span>Download PDF</span>
                     </button>
                   </td>
                 </tr>
@@ -329,31 +343,47 @@ export function PaginatedDataTable() {
         </table>
       </div>
 
-      {/* Pagination Footer */}
-      <div className="pt-4 mt-2 border-t border-surface-border flex items-center justify-between text-xs text-text-secondary font-mono">
-        <div>
-          Showing {paginatedData.length} of {sortedData.length} entries
+      {/* Pagination Controls */}
+      <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mt-6 pt-4 border-t border-surface-border">
+        <div className="text-xs font-mono text-text-secondary">
+          Showing{' '}
+          <span className="text-text-primary font-semibold">
+            {sortedData.length === 0
+              ? 0
+              : (validCurrentPage - 1) * pageSize + 1}
+          </span>{' '}
+          to{' '}
+          <span className="text-text-primary font-semibold">
+            {Math.min(validCurrentPage * pageSize, sortedData.length)}
+          </span>{' '}
+          of{' '}
+          <span className="text-text-primary font-semibold">
+            {sortedData.length}
+          </span>{' '}
+          collections
         </div>
 
         <div className="flex items-center gap-2">
           <button
             type="button"
             onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
-            disabled={currentPage === 1}
-            className="p-1.5 rounded-control bg-surface-glass border border-surface-border disabled:opacity-40 disabled:pointer-events-none hover:text-text-primary transition-colors"
+            disabled={validCurrentPage === 1}
             aria-label="Previous Page"
+            className="p-2 rounded-control bg-surface-glass border border-surface-border text-text-secondary hover:text-text-primary hover:border-surface-border-hover disabled:opacity-40 disabled:pointer-events-none transition-colors"
           >
             <ChevronLeft className="w-4 h-4" />
           </button>
-          <span>
-            Page {currentPage} of {totalPages}
+
+          <span className="text-xs font-mono px-3 text-text-secondary">
+            Page {validCurrentPage} of {totalPages}
           </span>
+
           <button
             type="button"
             onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
-            disabled={currentPage === totalPages}
-            className="p-1.5 rounded-control bg-surface-glass border border-surface-border disabled:opacity-40 disabled:pointer-events-none hover:text-text-primary transition-colors"
+            disabled={validCurrentPage === totalPages}
             aria-label="Next Page"
+            className="p-2 rounded-control bg-surface-glass border border-surface-border text-text-secondary hover:text-text-primary hover:border-surface-border-hover disabled:opacity-40 disabled:pointer-events-none transition-colors"
           >
             <ChevronRight className="w-4 h-4" />
           </button>

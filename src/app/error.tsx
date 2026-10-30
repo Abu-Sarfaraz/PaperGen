@@ -67,7 +67,7 @@ export default function GlobalErrorBoundary({
               className="w-full flex items-center justify-center gap-2"
             >
               <LayoutDashboard className="w-4 h-4" />
-              <span>Mission Control</span>
+              <span>PaperGen Studio</span>
             </Button>
           </Link>
 

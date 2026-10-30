@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+import Link from 'next/link';
 import { CreditCard, CheckCircle2, Shield, ArrowUpRight, Zap } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 
@@ -45,16 +46,20 @@ export function OrderStatusTracker({
 
         {/* Right CTA Actions */}
         <div className="flex items-center gap-3 shrink-0">
-          <Button variant="glass" size="sm" className="gap-1.5">
-            <CreditCard className="w-3.5 h-3.5" />
-            <span>Manage Billing</span>
-          </Button>
+          <Link href="/#pricing">
+            <Button variant="glass" size="sm" className="gap-1.5">
+              <CreditCard className="w-3.5 h-3.5" />
+              <span>Manage Billing</span>
+            </Button>
+          </Link>
 
-          <Button variant="primary" size="sm" className="gap-1.5">
-            <Shield className="w-3.5 h-3.5" />
-            <span>Upgrade Cluster</span>
-            <ArrowUpRight className="w-3.5 h-3.5" />
-          </Button>
+          <Link href="/#pricing">
+            <Button variant="primary" size="sm" className="gap-1.5">
+              <Shield className="w-3.5 h-3.5" />
+              <span>Upgrade Cluster</span>
+              <ArrowUpRight className="w-3.5 h-3.5" />
+            </Button>
+          </Link>
         </div>
       </div>
     </div>

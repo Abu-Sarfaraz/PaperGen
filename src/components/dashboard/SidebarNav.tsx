@@ -1,16 +1,15 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import {
-  Rocket,
+  GraduationCap,
   LayoutDashboard,
-  FolderGit2,
-  Activity,
-  Terminal,
+  Database,
+  Building2,
+  BookOpen,
   CreditCard,
-  Settings,
   ChevronLeft,
   ChevronRight,
   LogOut,
@@ -21,24 +20,57 @@ import {
 interface SidebarNavProps {
   userEmail?: string;
   orgName?: string;
+  isAdmin?: boolean;
 }
 
 export function SidebarNav({
   userEmail = 'educator@papergen.ai',
-  orgName = 'AetherSpace Org',
+  orgName = 'Cambridge Coaching Institute',
+  isAdmin: propIsAdmin,
 }: SidebarNavProps) {
   const [collapsed, setCollapsed] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(propIsAdmin ?? false);
   const pathname = usePathname();
 
-  const navItems = [
-    { name: 'Mission Overview', href: '/dashboard', icon: LayoutDashboard },
-    { name: 'Cloud Projects', href: '/dashboard/projects', icon: FolderGit2 },
-    { name: 'Telemetry Stream', href: '/dashboard/telemetry', icon: Activity },
-    { name: 'Deployment Logs', href: '/dashboard/deployments', icon: Terminal },
-    { name: 'Billing & Plan', href: '/dashboard/billing', icon: CreditCard },
-    { name: 'Admin Control Plane', href: '/admin', icon: ShieldAlert },
-    { name: 'Security & RLS', href: '/dashboard/settings', icon: Settings },
+  useEffect(() => {
+    if (propIsAdmin !== undefined) {
+      setIsAdmin(propIsAdmin);
+      return;
+    }
+    if (typeof document !== 'undefined') {
+      const hasAdminCookie =
+        document.cookie.includes('papergen-admin-session=true') ||
+        document.cookie.includes('launchpad-admin-session=true');
+      setIsAdmin(hasAdminCookie);
+    }
+  }, [propIsAdmin]);
+
+  // Primary navigation for Cambridge educators
+  const baseNavItems = [
+    { name: 'PaperGen Studio', href: '/dashboard', icon: LayoutDashboard },
+    { name: 'Question Bank', href: '/dashboard#question-bank', icon: Database },
+    { name: 'Institute Branding', href: '/dashboard#branding', icon: Building2 },
+    { name: 'Past Paper Archives', href: '/dashboard#archives', icon: BookOpen },
+    { name: 'Subscription & Plans', href: '/#pricing', icon: CreditCard },
   ];
+
+  // Admin Control Plane is strictly gated and ONLY visible to administrators
+  const navItems = isAdmin
+    ? [
+        ...baseNavItems,
+        { name: 'Admin Control Plane', href: '/admin', icon: ShieldAlert },
+      ]
+    : baseNavItems;
+
+  const handleSignOut = () => {
+    if (typeof document !== 'undefined') {
+      document.cookie = 'papergen-session=; path=/; max-age=0';
+      document.cookie = 'papergen-admin-session=; path=/; max-age=0';
+      document.cookie = 'papergen-educator-email=; path=/; max-age=0';
+      document.cookie = 'papergen-educator-name=; path=/; max-age=0';
+    }
+    window.location.href = '/auth';
+  };
 
   return (
     <aside
@@ -51,7 +83,7 @@ export function SidebarNav({
         <div className="h-16 border-b border-surface-border flex items-center justify-between px-4">
           <Link href="/" className="flex items-center gap-2.5 overflow-hidden">
             <div className="w-9 h-9 rounded-control bg-accent-purple/20 border border-accent-purple/40 flex items-center justify-center text-accent-purple shrink-0 shadow-glow">
-              <Rocket className="w-5 h-5" />
+              <GraduationCap className="w-5 h-5" />
             </div>
             {!collapsed && (
               <div className="flex flex-col truncate">
@@ -59,7 +91,7 @@ export function SidebarNav({
                   PaperGen
                 </span>
                 <span className="font-mono text-[9px] text-accent-cyan tracking-widest truncate">
-                  TELEMETRY HUB
+                  CAMBRIDGE EXAM STUDIO
                 </span>
               </div>
             )}
@@ -79,13 +111,13 @@ export function SidebarNav({
           </button>
         </div>
 
-        {/* Organization Badge */}
+        {/* Organization / Role Badge */}
         {!collapsed && (
           <div className="p-4 mx-3 my-3 rounded-control bg-surface-glass border border-surface-border">
             <div className="flex items-center gap-2 mb-1">
               <div className="w-2 h-2 rounded-full bg-status-success animate-ping" />
               <span className="font-mono text-[10px] text-accent-cyan tracking-wider uppercase">
-                ACTIVE CLUSTER
+                {isAdmin ? 'ADMINISTRATOR' : 'VERIFIED FACULTY'}
               </span>
             </div>
             <div className="font-display text-sm font-semibold text-text-primary truncate">
@@ -102,7 +134,7 @@ export function SidebarNav({
 
             return (
               <Link
-                key={item.href}
+                key={item.name}
                 href={item.href}
                 className={`flex items-center gap-3 px-3 py-2.5 rounded-control font-sans text-sm font-medium transition-all ${
                   isActive
@@ -136,18 +168,19 @@ export function SidebarNav({
               </span>
               <span className="font-mono text-[10px] text-status-success flex items-center gap-1">
                 <ShieldCheck className="w-3 h-3" />
-                <span>Verified</span>
+                <span>{isAdmin ? 'Super Admin' : 'Verified'}</span>
               </span>
             </div>
           )}
           {!collapsed && (
-            <Link
-              href="/auth"
+            <button
+              type="button"
+              onClick={handleSignOut}
               className="p-1.5 text-text-secondary hover:text-status-danger transition-colors shrink-0"
               title="Sign Out"
             >
               <LogOut className="w-4 h-4" />
-            </Link>
+            </button>
           )}
         </div>
       </div>

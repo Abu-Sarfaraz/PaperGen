@@ -10,8 +10,11 @@ import { PaperStudio } from '@/components/dashboard/PaperStudio';
 describe('Phase 3 Plane A UI: Dashboard Components', () => {
   it('renders SidebarNav and toggles collapsed state', () => {
     render(<SidebarNav userEmail="cadet@papergen.space" orgName="Orbital Lab" />);
-    expect(screen.getByText('Mission Overview')).toBeInTheDocument();
+    expect(screen.getByText('PaperGen Studio')).toBeInTheDocument();
     expect(screen.getByText('cadet@papergen.space')).toBeInTheDocument();
+
+    // Role-based security check: Normal user must NOT see Admin Control Plane
+    expect(screen.queryByText(/Admin Control Plane/i)).not.toBeInTheDocument();
 
     const collapseBtn = screen.getByRole('button', { name: /Collapse Sidebar/i });
     fireEvent.click(collapseBtn);
@@ -22,6 +25,11 @@ describe('Phase 3 Plane A UI: Dashboard Components', () => {
     const expandBtn = screen.getByRole('button', { name: /Expand Sidebar/i });
     fireEvent.click(expandBtn);
     expect(screen.getByText('cadet@papergen.space')).toBeInTheDocument();
+  });
+
+  it('renders Admin Control Plane in SidebarNav only when user has admin role', () => {
+    render(<SidebarNav userEmail="admin@papergen.ai" orgName="Cambridge Admin" isAdmin={true} />);
+    expect(screen.getByText('Admin Control Plane')).toBeInTheDocument();
   });
 
   it('renders TopStatsCards with all 4 KPI cards', () => {
@@ -49,13 +57,13 @@ describe('Phase 3 Plane A UI: Dashboard Components', () => {
 
   it('renders PaginatedDataTable, filters by search, and navigates pages', () => {
     render(<PaginatedDataTable />);
-    expect(screen.getByText('Orbital Mesh Portal')).toBeInTheDocument();
+    expect(screen.getByText(/Orbital Mesh Portal/i)).toBeInTheDocument();
 
     // Search filter
     const searchInput = screen.getByPlaceholderText(/Search projects or commit/i);
     fireEvent.change(searchInput, { target: { value: 'Relay' } });
-    expect(screen.getByText('Telemetry WebSocket Relay')).toBeInTheDocument();
-    expect(screen.queryByText('Orbital Mesh Portal')).not.toBeInTheDocument();
+    expect(screen.getByText(/Telemetry WebSocket Relay/i)).toBeInTheDocument();
+    expect(screen.queryByText(/Orbital Mesh Portal/i)).not.toBeInTheDocument();
 
     // Clear search
     fireEvent.change(searchInput, { target: { value: '' } });

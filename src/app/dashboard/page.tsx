@@ -43,10 +43,12 @@ export default function DashboardPage() {
         <TopStatsCards />
 
         {/* Interactive PaperGen Studio (Autonomous Paper Generator & PDF/DOC Exporter) */}
-        <PaperStudio />
+        <section id="studio">
+          <PaperStudio />
+        </section>
 
         {/* Past Exam Question Bank Logs & History */}
-        <div className="mb-4 flex items-center justify-between">
+        <div id="archives" className="mb-4 flex items-center justify-between pt-6">
           <div>
             <h2 className="font-display text-xl font-bold text-text-primary">
               Past Paper Archives & Generated Collections

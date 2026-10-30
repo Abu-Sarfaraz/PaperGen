@@ -1,6 +1,6 @@
 import React from 'react';
 import Link from 'next/link';
-import { Compass, Home, LayoutDashboard, ArrowLeft, Shield } from 'lucide-react';
+import { Compass, Home, LayoutDashboard, ArrowLeft } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 
 export default function NotFoundPage() {
@@ -42,17 +42,6 @@ export default function NotFoundPage() {
             >
               <LayoutDashboard className="w-4 h-4" />
               <span>Return to Dashboard</span>
-            </Button>
-          </Link>
-
-          <Link href="/admin" className="w-full sm:w-auto">
-            <Button
-              type="button"
-              variant="outline"
-              className="w-full flex items-center justify-center gap-2"
-            >
-              <Shield className="w-4 h-4 text-accent-purple" />
-              <span>Admin Console</span>
             </Button>
           </Link>
 
