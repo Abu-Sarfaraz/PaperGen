@@ -7,24 +7,22 @@ import { NextRequest } from 'next/server';
 
 describe('Phase 4: Auth Redirects and Payments Webhooks', () => {
   describe('OAuth Route Handler (/api/auth/oauth)', () => {
-    it('redirects to /dashboard and sets educator session cookie for Google', async () => {
+    it('strictly forbids unauthorized login and redirects to /auth with provider_disabled error when Google OAuth is not enabled', async () => {
       const request = new NextRequest('http://localhost:3000/api/auth/oauth?provider=google&next=/dashboard');
       const response = await oauthRouteHandler(request);
 
       expect(response.status).toBe(307);
-      expect(response.headers.get('location')).toContain('/dashboard');
-      expect(response.cookies.get('papergen-session')?.value).toBe('true');
-      expect(response.cookies.get('papergen-educator-email')?.value).toBe('educator.google@papergen.ai');
+      expect(response.headers.get('location')).toContain('/auth?error=provider_disabled&provider=google');
+      expect(response.cookies.get('papergen-session')).toBeUndefined();
     });
 
-    it('redirects to /dashboard and sets educator session cookie for GitHub', async () => {
+    it('strictly forbids unauthorized login and redirects to /auth with provider_disabled error when GitHub OAuth is not enabled', async () => {
       const request = new NextRequest('http://localhost:3000/api/auth/oauth?provider=github&next=/dashboard');
       const response = await oauthRouteHandler(request);
 
       expect(response.status).toBe(307);
-      expect(response.headers.get('location')).toContain('/dashboard');
-      expect(response.cookies.get('papergen-session')?.value).toBe('true');
-      expect(response.cookies.get('papergen-educator-email')?.value).toBe('educator.github@papergen.ai');
+      expect(response.headers.get('location')).toContain('/auth?error=provider_disabled&provider=github');
+      expect(response.cookies.get('papergen-session')).toBeUndefined();
     });
   });
 

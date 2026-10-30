@@ -8,8 +8,6 @@ export async function GET(request: NextRequest) {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://jwuwwgkvjzbzqrezpyko.supabase.co';
   const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imp3dXd3Z2t2anpienFyZXpweWtvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTI3OTI0MjIsImV4cCI6MjEwODM2ODQyMn0.0tYTI6eCiXW4JfeXHG4JxcwmHtnyoD2t2c-gMnwYENg';
 
-  const providerLabel = provider === 'google' ? 'Google' : 'GitHub';
-
   try {
     // 1. Check if Supabase has this OAuth provider enabled
     const checkRes = await fetch(
@@ -19,7 +17,7 @@ export async function GET(request: NextRequest) {
         headers: {
           apikey: supabaseAnonKey,
         },
-        redirect: 'manual', // do not follow redirect automatically
+        redirect: 'manual',
       }
     );
 
@@ -29,42 +27,15 @@ export async function GET(request: NextRequest) {
       return NextResponse.redirect(location);
     }
 
-    // 2. If Supabase returned 400 (e.g. "Unsupported provider: provider is not enabled"),
-    // authenticate as verified Cambridge educator for that provider seamlessly:
-    const targetUrl = new URL(next, origin);
-    const response = NextResponse.redirect(targetUrl);
-
-    response.cookies.set('papergen-session', 'true', {
-      path: '/',
-      maxAge: 60 * 60 * 24 * 30, // 30 days
-      httpOnly: false,
-      sameSite: 'lax',
-    });
-
-    response.cookies.set('papergen-educator-email', `educator.${provider}@papergen.ai`, {
-      path: '/',
-      maxAge: 60 * 60 * 24 * 30,
-      httpOnly: false,
-      sameSite: 'lax',
-    });
-
-    response.cookies.set('papergen-educator-name', `Cambridge Educator (${providerLabel})`, {
-      path: '/',
-      maxAge: 60 * 60 * 24 * 30,
-      httpOnly: false,
-      sameSite: 'lax',
-    });
-
-    return response;
+    // 2. If provider is not configured in Supabase, DO NOT allow unauthorized login.
+    // Redirect back to /auth with a descriptive error so the user logs in with authorized credentials.
+    const errorUrl = new URL('/auth', origin);
+    errorUrl.searchParams.set('error', 'provider_disabled');
+    errorUrl.searchParams.set('provider', provider);
+    return NextResponse.redirect(errorUrl);
   } catch {
-    // Graceful fallback
-    const fallbackResponse = NextResponse.redirect(new URL(next, origin));
-    fallbackResponse.cookies.set('papergen-session', 'true', {
-      path: '/',
-      maxAge: 60 * 60 * 24 * 30,
-      httpOnly: false,
-      sameSite: 'lax',
-    });
-    return fallbackResponse;
+    const errorUrl = new URL('/auth', origin);
+    errorUrl.searchParams.set('error', 'oauth_failed');
+    return NextResponse.redirect(errorUrl);
   }
 }

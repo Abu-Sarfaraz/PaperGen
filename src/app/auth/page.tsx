@@ -1,10 +1,10 @@
 'use client';
 
-import React, { useState, Suspense } from 'react';
+import React, { useState, useEffect, Suspense } from 'react';
 import Link from 'next/link';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/Button';
-import { GraduationCap, Shield, Lock, Mail, ArrowRight, CheckCircle2, AlertCircle, Sparkles } from 'lucide-react';
+import { GraduationCap, Shield, Lock, Mail, ArrowRight, CheckCircle2, AlertCircle } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 
 function AuthContent() {
@@ -22,6 +22,29 @@ function AuthContent() {
 
   const supabase = createClient();
 
+  useEffect(() => {
+    const errorParam = searchParams.get('error');
+    const providerParam = searchParams.get('provider');
+
+    if (errorParam === 'provider_disabled') {
+      const providerLabel = providerParam === 'github' ? 'GitHub' : 'Google';
+      setMessage({
+        type: 'error',
+        text: `${providerLabel} authentication is not enabled in your Supabase project settings. Please sign in with your email and password below.`,
+      });
+    } else if (errorParam === 'auth_callback_failed') {
+      setMessage({
+        type: 'error',
+        text: 'Authentication could not be verified. Please sign in with your registered credentials.',
+      });
+    } else if (errorParam) {
+      setMessage({
+        type: 'error',
+        text: `Authentication error: ${decodeURIComponent(errorParam)}`,
+      });
+    }
+  }, [searchParams]);
+
   const formatAuthError = (msg: string): string => {
     const lower = msg.toLowerCase();
     if (lower.includes('invalid login credentials')) {
@@ -34,43 +57,18 @@ function AuthContent() {
       return 'Your password must be at least 6 characters long.';
     }
     if (lower.includes('email not confirmed')) {
-      return 'Your confirmation email was sent. You can also click the Instant Demo button above to enter immediately.';
+      return 'Please check your email inbox and click the confirmation link to activate your account.';
     }
     if (lower.includes('rate limit')) {
       return 'Too many login attempts. Please wait a minute before trying again.';
     }
-    return msg || 'Authentication could not be completed. Please try again.';
+    return msg || 'Authentication could not be completed. Please check your credentials.';
   };
 
   const handleOAuthLogin = (provider: 'google' | 'github') => {
     setLoading(true);
-    const providerName = provider === 'google' ? 'Google' : 'GitHub';
-
-    document.cookie = `papergen-session=true; path=/; max-age=604800; SameSite=Lax`;
-    document.cookie = `papergen-educator-email=educator.${provider}@papergen.ai; path=/; max-age=604800; SameSite=Lax`;
-    document.cookie = `papergen-educator-name=Cambridge Educator (${providerName}); path=/; max-age=604800; SameSite=Lax`;
-
-    setMessage({
-      type: 'success',
-      text: `Authenticating with ${providerName}... Redirecting to Paper Studio...`,
-    });
+    setMessage(null);
     window.location.href = `/api/auth/oauth?provider=${provider}&next=/dashboard`;
-  };
-
-  const handleInstantDemo = () => {
-    setLoading(true);
-    document.cookie = `papergen-session=true; path=/; max-age=604800; SameSite=Lax`;
-    document.cookie = `papergen-educator-email=tanvir.faculty@papergen.ai; path=/; max-age=604800; SameSite=Lax`;
-    document.cookie = `papergen-educator-name=Tanvir Ahmed (Senior Cambridge Faculty); path=/; max-age=604800; SameSite=Lax`;
-
-    setMessage({
-      type: 'success',
-      text: 'Instant access granted! Entering PaperGen Examination Studio...',
-    });
-
-    setTimeout(() => {
-      router.push('/dashboard');
-    }, 500);
   };
 
   const handleEmailAuth = async (e: React.FormEvent) => {
@@ -86,7 +84,7 @@ function AuthContent() {
 
     try {
       if (mode === 'signup') {
-        const { error } = await supabase.auth.signUp({
+        const { data, error } = await supabase.auth.signUp({
           email,
           password,
           options: {
@@ -100,43 +98,50 @@ function AuthContent() {
 
         if (error) {
           setMessage({ type: 'error', text: formatAuthError(error.message) });
-        } else {
+          setLoading(false);
+          return;
+        }
+
+        if (data?.session) {
           document.cookie = `papergen-session=true; path=/; max-age=604800; SameSite=Lax`;
           document.cookie = `papergen-educator-email=${encodeURIComponent(email)}; path=/; max-age=604800; SameSite=Lax`;
           setMessage({
             type: 'success',
-            text: 'Account created successfully! Entering Paper Studio...',
+            text: 'Account created and authorized! Entering Paper Studio...',
           });
-          setTimeout(() => router.push('/dashboard'), 800);
+          setTimeout(() => router.push('/dashboard'), 600);
+        } else {
+          setMessage({
+            type: 'success',
+            text: 'Registration successful! Please check your email inbox to confirm your account before signing in.',
+          });
+          setLoading(false);
         }
       } else {
-        const { error } = await supabase.auth.signInWithPassword({
+        const { data, error } = await supabase.auth.signInWithPassword({
           email,
           password,
         });
 
         if (error) {
-          // Graceful fallback if credentials need bypass or testing
-          if (email.toLowerCase().includes('educator') || email.toLowerCase().includes('teacher') || password.length >= 6) {
-            document.cookie = `papergen-session=true; path=/; max-age=604800; SameSite=Lax`;
-            document.cookie = `papergen-educator-email=${encodeURIComponent(email)}; path=/; max-age=604800; SameSite=Lax`;
-            setMessage({ type: 'success', text: 'Authenticated! Entering Paper Studio...' });
-            setTimeout(() => router.push('/dashboard'), 600);
-            return;
-          }
           setMessage({ type: 'error', text: formatAuthError(error.message) });
-        } else {
+          setLoading(false);
+          return;
+        }
+
+        if (data?.session && data.user) {
           document.cookie = `papergen-session=true; path=/; max-age=604800; SameSite=Lax`;
-          document.cookie = `papergen-educator-email=${encodeURIComponent(email)}; path=/; max-age=604800; SameSite=Lax`;
-          setMessage({ type: 'success', text: 'Authenticated! Redirecting...' });
+          document.cookie = `papergen-educator-email=${encodeURIComponent(data.user.email || email)}; path=/; max-age=604800; SameSite=Lax`;
+          document.cookie = `papergen-educator-name=${encodeURIComponent(data.user.user_metadata?.full_name || 'Cambridge Educator')}; path=/; max-age=604800; SameSite=Lax`;
+          setMessage({ type: 'success', text: 'Authenticated! Entering Paper Studio...' });
           router.push('/dashboard');
+        } else {
+          setMessage({ type: 'error', text: 'Unable to verify credentials. Please try again.' });
+          setLoading(false);
         }
       }
     } catch {
-      document.cookie = `papergen-session=true; path=/; max-age=604800; SameSite=Lax`;
-      setMessage({ type: 'success', text: 'Authenticated! Entering Paper Studio...' });
-      setTimeout(() => router.push('/dashboard'), 600);
-    } finally {
+      setMessage({ type: 'error', text: 'Authentication failed. Please verify your credentials and try again.' });
       setLoading(false);
     }
   };
@@ -166,30 +171,6 @@ function AuthContent() {
 
       {/* Main Glass Auth Card */}
       <div className="w-full max-w-md glass-panel p-8 relative z-10 shadow-2xl">
-        {/* 1-Click Instant Demo Box */}
-        <div className="mb-6 p-3.5 rounded-control bg-accent-purple/10 border border-accent-purple/30 text-center">
-          <div className="flex items-center justify-between gap-2 mb-1.5">
-            <span className="font-mono text-[11px] text-accent-purple uppercase tracking-wider font-semibold">
-              ⚡ Quick Test Access
-            </span>
-            <span className="text-[10px] font-mono px-2 py-0.5 rounded-pill bg-status-success/20 text-status-success font-semibold">
-              NO PASSWORD NEEDED
-            </span>
-          </div>
-          <p className="font-sans text-xs text-text-secondary mb-3 text-left">
-            Test PaperGen instantly as a Cambridge Mathematics faculty without configuring OAuth credentials.
-          </p>
-          <button
-            type="button"
-            onClick={handleInstantDemo}
-            disabled={loading}
-            className="w-full py-2 px-3 rounded-control bg-accent-purple hover:bg-accent-purple/90 text-white font-sans text-xs font-semibold shadow-glow transition-all flex items-center justify-center gap-2"
-          >
-            <Sparkles className="w-3.5 h-3.5 text-accent-cyan" />
-            <span>Enter as Cambridge Educator (Instant Demo)</span>
-          </button>
-        </div>
-
         {/* Mode Switcher Tabs */}
         <div className="grid grid-cols-2 p-1 rounded-control bg-midnight-900 border border-surface-border mb-6">
           <button
@@ -367,7 +348,13 @@ function AuthContent() {
 
 export default function AuthPage() {
   return (
-    <Suspense fallback={<div className="min-h-screen bg-midnight-950" />}>
+    <Suspense
+      fallback={
+        <div className="min-h-screen bg-midnight-950 flex items-center justify-center">
+          <div className="w-8 h-8 rounded-full border-2 border-accent-purple border-t-transparent animate-spin" />
+        </div>
+      }
+    >
       <AuthContent />
     </Suspense>
   );
