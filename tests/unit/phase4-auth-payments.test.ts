@@ -1,9 +1,33 @@
 import { describe, it, expect, vi } from 'vitest';
 import { GET as authCallbackHandler } from '@/app/auth/callback/route';
+import { GET as oauthRouteHandler } from '@/app/api/auth/oauth/route';
 import { POST as checkoutSessionHandler } from '@/app/api/checkout/session/route';
 import { POST as webhookHandler } from '@/app/api/webhooks/checkout/route';
+import { NextRequest } from 'next/server';
 
 describe('Phase 4: Auth Redirects and Payments Webhooks', () => {
+  describe('OAuth Route Handler (/api/auth/oauth)', () => {
+    it('redirects to /dashboard and sets educator session cookie for Google', async () => {
+      const request = new NextRequest('http://localhost:3000/api/auth/oauth?provider=google&next=/dashboard');
+      const response = await oauthRouteHandler(request);
+
+      expect(response.status).toBe(307);
+      expect(response.headers.get('location')).toContain('/dashboard');
+      expect(response.cookies.get('papergen-session')?.value).toBe('true');
+      expect(response.cookies.get('papergen-educator-email')?.value).toBe('educator.google@papergen.ai');
+    });
+
+    it('redirects to /dashboard and sets educator session cookie for GitHub', async () => {
+      const request = new NextRequest('http://localhost:3000/api/auth/oauth?provider=github&next=/dashboard');
+      const response = await oauthRouteHandler(request);
+
+      expect(response.status).toBe(307);
+      expect(response.headers.get('location')).toContain('/dashboard');
+      expect(response.cookies.get('papergen-session')?.value).toBe('true');
+      expect(response.cookies.get('papergen-educator-email')?.value).toBe('educator.github@papergen.ai');
+    });
+  });
+
   describe('Auth Redirect Callback', () => {
     it('redirects to /auth with error parameter when error is passed in query', async () => {
       const request = new Request('http://localhost:3000/auth/callback?error=access_denied');

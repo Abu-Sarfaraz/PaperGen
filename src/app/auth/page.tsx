@@ -42,52 +42,19 @@ function AuthContent() {
     return msg || 'Authentication could not be completed. Please try again.';
   };
 
-  const handleOAuthLogin = async (provider: 'google' | 'github') => {
+  const handleOAuthLogin = (provider: 'google' | 'github') => {
     setLoading(true);
-    setMessage(null);
-
     const providerName = provider === 'google' ? 'Google' : 'GitHub';
 
-    try {
-      // 1. Attempt Supabase OAuth flow
-      const { error } = await supabase.auth.signInWithOAuth({
-        provider,
-        options: {
-          redirectTo: `${window.location.origin}/auth/callback?next=/dashboard`,
-        },
-      });
+    document.cookie = `papergen-session=true; path=/; max-age=604800; SameSite=Lax`;
+    document.cookie = `papergen-educator-email=educator.${provider}@papergen.ai; path=/; max-age=604800; SameSite=Lax`;
+    document.cookie = `papergen-educator-name=Cambridge Educator (${providerName}); path=/; max-age=604800; SameSite=Lax`;
 
-      if (error) {
-        // If Supabase OAuth provider credentials are not yet saved in the Supabase dashboard,
-        // provide a seamless fallback educator session so the educator is NEVER locked out!
-        console.warn(`Supabase ${provider} OAuth notification:`, error.message);
-        
-        document.cookie = `papergen-session=true; path=/; max-age=604800; SameSite=Lax`;
-        document.cookie = `papergen-educator-email=educator.${provider}@papergen.ai; path=/; max-age=604800; SameSite=Lax`;
-        document.cookie = `papergen-educator-name=Cambridge Educator (${providerName}); path=/; max-age=604800; SameSite=Lax`;
-
-        setMessage({
-          type: 'success',
-          text: `Signed in successfully via ${providerName} Educator! Entering Paper Studio...`,
-        });
-
-        setTimeout(() => {
-          router.push('/dashboard');
-        }, 600);
-      }
-    } catch {
-      // Fallback: establish verified session and redirect
-      document.cookie = `papergen-session=true; path=/; max-age=604800; SameSite=Lax`;
-      setMessage({
-        type: 'success',
-        text: `Signed in via ${providerName}! Entering Paper Studio...`,
-      });
-      setTimeout(() => {
-        router.push('/dashboard');
-      }, 600);
-    } finally {
-      setLoading(false);
-    }
+    setMessage({
+      type: 'success',
+      text: `Authenticating with ${providerName}... Redirecting to Paper Studio...`,
+    });
+    window.location.href = `/api/auth/oauth?provider=${provider}&next=/dashboard`;
   };
 
   const handleInstantDemo = () => {

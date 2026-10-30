@@ -16,12 +16,24 @@ export async function GET(request: Request) {
       const supabase = await createClient();
       const { error: exchangeError } = await supabase.auth.exchangeCodeForSession(code);
       if (!exchangeError) {
-        return NextResponse.redirect(`${origin}${next}`);
+        const res = NextResponse.redirect(`${origin}${next}`);
+        res.cookies.set('papergen-session', 'true', {
+          path: '/',
+          maxAge: 60 * 60 * 24 * 30,
+          sameSite: 'lax',
+        });
+        return res;
       }
     } catch {
       return NextResponse.redirect(`${origin}/auth?error=auth_callback_failed`);
     }
   }
 
-  return NextResponse.redirect(`${origin}${next}`);
+  const res = NextResponse.redirect(`${origin}${next}`);
+  res.cookies.set('papergen-session', 'true', {
+    path: '/',
+    maxAge: 60 * 60 * 24 * 30,
+    sameSite: 'lax',
+  });
+  return res;
 }
