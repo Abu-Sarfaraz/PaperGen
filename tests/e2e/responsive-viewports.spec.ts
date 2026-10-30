@@ -9,11 +9,11 @@ test.describe('Phase 5: Multi-Viewport Responsive QA', () => {
     // Verify H1 and Hero CTAs
     const heading = page.locator('h1');
     await expect(heading).toBeVisible();
-    await expect(heading).toContainText('Space-Tech Cloud');
+    await expect(heading).toContainText('IGCSE Exam Papers');
 
     // Verify Dual CTAs
-    const getStartedBtn = page.getByRole('button', { name: /Get Started/i });
-    await expect(getStartedBtn).toBeVisible();
+    const openStudioBtn = page.getByRole('button', { name: /Open Paper Studio/i });
+    await expect(openStudioBtn).toBeVisible();
 
     // Verify Pricing Toggle
     const annualBtn = page.getByRole('button', { name: /Annual Billing/i });
@@ -57,8 +57,8 @@ test.describe('Phase 5: Multi-Viewport Responsive QA', () => {
     await page.setExtraHTTPHeaders({ 'x-playwright-test': 'true' });
     await page.goto('/dashboard');
 
-    // Verify Mission Control Header
-    await expect(page.getByText(/Mission Control & Deployment Hub/i)).toBeVisible();
+    // Verify PaperGen Examination Studio Header
+    await expect(page.getByText(/PaperGen Examination Studio/i)).toBeVisible();
 
     // Verify 4 KPI cards
     await expect(page.getByText('ACTIVE PROJECTS')).toBeVisible();

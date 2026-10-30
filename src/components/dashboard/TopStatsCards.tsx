@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { Rocket, Activity, Database, ShieldCheck, TrendingUp } from 'lucide-react';
+import { BookOpen, Zap, Database, ShieldCheck, TrendingUp } from 'lucide-react';
 
 interface StatCardProps {
   title: string;
@@ -15,26 +15,26 @@ interface StatCardProps {
 const stats: StatCardProps[] = [
   {
     title: 'ACTIVE PROJECTS',
-    value: '18 Online',
-    change: '+3 this week',
+    value: '18 Papers Active',
+    change: '+5 generated this week',
     changePositive: true,
-    metric: '99.99% Node Health',
-    icon: Rocket,
+    metric: 'Cambridge 0580 / 4024',
+    icon: BookOpen,
   },
   {
     title: 'PIPELINE VELOCITY',
-    value: '38.4s',
-    change: '-4.2s vs baseline',
+    value: '1.4s Synthesis',
+    change: '-0.3s vs baseline',
     changePositive: true,
-    metric: 'Fluid Compute Edge',
-    icon: Activity,
+    metric: 'Dual AI Failover Ready',
+    icon: Zap,
   },
   {
     title: 'MONTHLY API QUOTA',
-    value: '842.1K',
-    change: '84.2% of 1.0M limit',
+    value: '842.1K Tokens',
+    change: '84.2% quota available',
     changePositive: true,
-    metric: 'Auto-resets in 9 days',
+    metric: 'Gemini + OpenRouter',
     icon: Database,
   },
   {
@@ -42,7 +42,7 @@ const stats: StatCardProps[] = [
     value: '100% Zero-Trust',
     change: '0 security advisories',
     changePositive: true,
-    metric: '6 Tables RLS Protected',
+    metric: 'Exam Bank RLS Guarded',
     icon: ShieldCheck,
   },
 ];
@@ -83,8 +83,8 @@ export function TopStatsCards() {
                 <span
                   className={
                     stat.changePositive
-                      ? 'text-status-success font-medium'
-                      : 'text-status-danger font-medium'
+                      ? 'text-status-success'
+                      : 'text-status-danger'
                   }
                 >
                   {stat.change}
@@ -92,9 +92,8 @@ export function TopStatsCards() {
               </div>
             </div>
 
-            <div className="pt-3 border-t border-surface-border font-mono text-[11px] text-text-secondary flex items-center justify-between">
-              <span>Status</span>
-              <span className="text-accent-cyan">{stat.metric}</span>
+            <div className="pt-3 border-t border-surface-border text-xs font-mono text-text-secondary">
+              {stat.metric}
             </div>
           </div>
         );

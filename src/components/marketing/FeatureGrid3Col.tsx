@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { Rocket, ShieldCheck, Activity, Cpu, Database, Zap } from 'lucide-react';
+import { Database, TrendingUp, RefreshCw, Layers, ShieldCheck, Printer } from 'lucide-react';
 
 interface FeatureItem {
   icon: React.ElementType;
@@ -13,52 +13,52 @@ interface FeatureItem {
 
 const features: FeatureItem[] = [
   {
-    icon: Rocket,
-    title: 'Orbital Cloud Fabric',
+    icon: Database,
+    title: 'Classified IGCSE Past Paper Bank',
     description:
-      'Ultra-resilient microservices orchestrated across decentralized edge zones with automated failover.',
-    metric: '99.999% SLA',
-    badge: 'EDGE COMPUTE',
+      'Categorized past exam questions from Cambridge Mathematics (0580/4024), Physics (0625/9702), and Chemistry indexed by chapter, year, and paper.',
+    metric: '1,200+ QUESTIONS',
+    badge: 'QUESTION BANK',
   },
   {
-    icon: Activity,
-    title: 'Telemetry Telepresence',
+    icon: TrendingUp,
+    title: 'Cognitive Difficulty Curves',
     description:
-      'Live streaming metrics and distributed traces delivered under 15ms through our websocket event bus.',
-    metric: '< 15ms LATENCY',
-    badge: 'REALTIME STREAM',
+      'Calibrate mock papers automatically with CAIE Standard (30% Easy, 50% Medium, 20% Hard), Foundation Drill, or A* Challenger curves.',
+    metric: '3 PEDAGOGIC CURVES',
+    badge: 'COGNITIVE TIERS',
+  },
+  {
+    icon: RefreshCw,
+    title: '1-Click Atomic Question Swapping',
+    description:
+      'Instantly swap any candidate question while preserving target marks and synchronizing Section B official mark schemes simultaneously.',
+    metric: 'ATOMIC SYNC',
+    badge: 'CIRCULAR ROTATION',
+  },
+  {
+    icon: Layers,
+    title: 'Vector KaTeX Mathematical Typography',
+    description:
+      'Sharp rendering for quadratic formulas, fractions, matrices, and geometry coordinates without blurry scanned past paper screenshots.',
+    metric: 'VECTOR SHARP',
+    badge: 'KATEX MATH',
   },
   {
     icon: ShieldCheck,
-    title: 'Multi-Tenant RLS Fortress',
+    title: 'Institute Branding & Watermark',
     description:
-      'Strict PostgreSQL Row-Level Security policies bound to organization memberships with zero data leakage.',
-    metric: 'ZERO-TRUST RLS',
-    badge: 'COMPLIANCE',
+      'Stamp your coaching center emblem logo, teacher subtitle, diagonal watermark, candidate score box, and official exam instructions.',
+    metric: 'CUSTOM BRANDING',
+    badge: 'WATERMARK ENGINE',
   },
   {
-    icon: Cpu,
-    title: 'Autonomous Scaling Mesh',
+    icon: Printer,
+    title: 'Print-Ready PDF & Word (.doc) Export',
     description:
-      'Dynamic compute allocation that auto-scales resources to mission workloads with instant cold starts.',
-    metric: '50ms COLD START',
-    badge: 'AUTONOMOUS',
-  },
-  {
-    icon: Database,
-    title: 'Instant Database Replicas',
-    description:
-      'High-throughput PostgreSQL persistence with integrated point-in-time recovery and transactional webhooks.',
-    metric: '100K OPS/SEC',
-    badge: 'POSTGRES 15',
-  },
-  {
-    icon: Zap,
-    title: 'One-Click Global Deploy',
-    description:
-      'Continuous verification pipelines that build, test, and promote production deployments seamlessly.',
-    metric: '45s TIME TO EDGE',
-    badge: 'CI/CD HYGIENE',
+      'Formatted for A4 sheets with mark-proportional student answer spaces, avoiding mid-question page slicing with isolated print stylesheets.',
+    metric: 'ZERO-DEPENDENCY',
+    badge: 'PDF & DOC EXPORT',
   },
 ];
 
@@ -71,11 +71,10 @@ export function FeatureGrid3Col() {
             CORE CAPABILITIES
           </div>
           <h2 className="font-display text-3xl sm:text-4xl font-bold text-text-primary tracking-tight mb-4">
-            Engineered for Deep Space & Mission-Critical Cloud
+            Engineered Specifically for Cambridge IGCSE & O/A-Level Educators
           </h2>
           <p className="font-sans text-text-secondary text-base sm:text-lg">
-            Every layer of PaperGen is calibrated to deliver ultra-low latency,
-            uncompromising security, and deterministic reliability.
+            Stop spending hours manually copy-pasting past papers or paying TAs. Create customized, syllabus-aligned worksheets in under 90 seconds.
           </p>
         </div>
 
@@ -97,23 +96,17 @@ export function FeatureGrid3Col() {
                       {feature.badge}
                     </span>
                   </div>
-
-                  <h3 className="font-display text-xl font-semibold text-text-primary mb-2">
+                  <h3 className="font-display font-bold text-lg text-text-primary mb-2">
                     {feature.title}
                   </h3>
-
-                  <p className="font-sans text-sm text-text-secondary leading-relaxed mb-6">
+                  <p className="font-sans text-sm text-text-secondary leading-relaxed">
                     {feature.description}
                   </p>
                 </div>
 
-                <div className="pt-4 border-t border-surface-border flex items-center justify-between">
-                  <span className="font-mono text-xs text-text-secondary">
-                    METRIC
-                  </span>
-                  <span className="font-mono text-xs font-bold text-accent-cyan">
-                    {feature.metric}
-                  </span>
+                <div className="mt-6 pt-4 border-t border-surface-border flex items-center justify-between font-mono text-xs">
+                  <span className="text-text-secondary">BENCHMARK</span>
+                  <span className="text-accent-cyan font-bold">{feature.metric}</span>
                 </div>
               </div>
             );

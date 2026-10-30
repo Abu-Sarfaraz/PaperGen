@@ -2,8 +2,8 @@ import type { Metadata } from 'next';
 import '@/styles/globals.css';
 
 export const metadata: Metadata = {
-  title: 'PaperGen — AI-Powered Exam & Worksheet Studio',
-  description: 'Next-generation AI examination paper generator and academic worksheet studio.',
+  title: 'PaperGen — Cambridge IGCSE & O-Level Exam Paper Maker from Past Papers',
+  description: 'Create print-ready Cambridge IGCSE and O/A-Level exam papers and worksheets in 90 seconds from past papers with official mark schemes and custom coaching branding.',
 };
 
 export default function RootLayout({

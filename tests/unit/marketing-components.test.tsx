@@ -7,29 +7,29 @@ import { GlassPricingTable } from '@/components/marketing/GlassPricingTable';
 import { TestimonialsCarousel } from '@/components/marketing/TestimonialsCarousel';
 import { ResponsiveFooter } from '@/components/marketing/ResponsiveFooter';
 
-describe('Phase 3 Plane A UI: Marketing Components', () => {
-  it('renders HeroPaperGen with orbital badge, H1, and dual CTAs', () => {
+describe('Phase 3 Plane A UI: Marketing Components (PaperGen IGCSE Studio)', () => {
+  it('renders HeroPaperGen with Cambridge IGCSE badge, H1, and dual CTAs', () => {
     render(<HeroPaperGen />);
-    expect(screen.getByText(/Orbital Infrastructure Active/i)).toBeInTheDocument();
-    expect(screen.getByText(/Space-Tech Cloud/i)).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: /Get Started/i })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: /Explore Telemetry/i })).toBeInTheDocument();
+    expect(screen.getByText(/Cambridge IGCSE & O\/A-Level Past Paper Engine Active/i)).toBeInTheDocument();
+    expect(screen.getByText(/IGCSE Exam Papers/i)).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /Open Paper Studio/i })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /Get Started Free/i })).toBeInTheDocument();
   });
 
   it('renders FeatureGrid3Col with 3-column features and metrics', () => {
     render(<FeatureGrid3Col />);
-    expect(screen.getByText(/Orbital Cloud Fabric/i)).toBeInTheDocument();
-    expect(screen.getByText(/Telemetry Telepresence/i)).toBeInTheDocument();
-    expect(screen.getByText(/Multi-Tenant RLS Fortress/i)).toBeInTheDocument();
-    expect(screen.getByText('99.999% SLA')).toBeInTheDocument();
-    expect(screen.getByText('< 15ms LATENCY')).toBeInTheDocument();
+    expect(screen.getByText(/Classified IGCSE Past Paper Bank/i)).toBeInTheDocument();
+    expect(screen.getByText(/Cognitive Difficulty Curves/i)).toBeInTheDocument();
+    expect(screen.getByText(/1-Click Atomic Question Swapping/i)).toBeInTheDocument();
+    expect(screen.getByText('1,200+ QUESTIONS')).toBeInTheDocument();
+    expect(screen.getByText('3 PEDAGOGIC CURVES')).toBeInTheDocument();
   });
 
-  it('renders GlassPricingTable with Starter, Pro, and Enterprise tiers and toggles monthly/annual', () => {
+  it('renders GlassPricingTable with Solo Educator, Coaching Center, and School & Academy tiers and toggles monthly/annual', () => {
     render(<GlassPricingTable />);
-    expect(screen.getByText('Starter')).toBeInTheDocument();
-    expect(screen.getByText('Pro')).toBeInTheDocument();
-    expect(screen.getByText('Enterprise')).toBeInTheDocument();
+    expect(screen.getByText('Solo Educator')).toBeInTheDocument();
+    expect(screen.getByText('Coaching Center')).toBeInTheDocument();
+    expect(screen.getByText('School & Academy')).toBeInTheDocument();
 
     // Default monthly
     expect(screen.getByText('$29')).toBeInTheDocument();
@@ -48,12 +48,12 @@ describe('Phase 3 Plane A UI: Marketing Components', () => {
 
   it('renders TestimonialsCarousel and navigates between testimonials', () => {
     render(<TestimonialsCarousel />);
-    expect(screen.getByText(/AetherSpace Dynamics/i)).toBeInTheDocument();
+    expect(screen.getByText(/Tanvir Ahmed/i)).toBeInTheDocument();
 
     // Click next
     const nextBtn = screen.getByRole('button', { name: /Next testimonial/i });
     fireEvent.click(nextBtn);
-    expect(screen.getByText(/Nova Telepresence/i)).toBeInTheDocument();
+    expect(screen.getByText(/Sarah Jenkins/i)).toBeInTheDocument();
   });
 
   it('renders ResponsiveFooter with status pill and legal info', () => {
