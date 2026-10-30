@@ -33,7 +33,7 @@ test.describe('Phase 5: Multi-Viewport Responsive QA', () => {
     await page.goto('/auth');
 
     // Verify Auth Card
-    await expect(page.getByText(/Orbital Cloud Gateway/i)).toBeVisible();
+    await expect(page.getByText(/PaperGen Educator Portal/i)).toBeVisible();
     await expect(
       page.getByRole('button', { name: /Continue with Google/i })
     ).toBeVisible();
@@ -42,12 +42,12 @@ test.describe('Phase 5: Multi-Viewport Responsive QA', () => {
     ).toBeVisible();
 
     // Verify tabs
-    const createMissionTab = page.getByRole('button', {
-      name: /Create Mission/i,
+    const createAccountTab = page.getByRole('button', {
+      name: /Create Account/i,
     });
-    await createMissionTab.click();
+    await createAccountTab.click();
     await expect(
-      page.getByRole('button', { name: /Create Mission Account/i })
+      page.getByRole('button', { name: /Create Educator Account/i })
     ).toBeVisible();
   });
 

@@ -68,7 +68,11 @@ export async function middleware(request: NextRequest) {
       request.cookies.get(`sb-${process.env.SUPABASE_PROJECT_REF || 'default'}-auth-token`) ||
       request.headers.get('x-playwright-test');
 
-    if (authCookie) {
+    const hasSbToken = request.cookies
+      .getAll()
+      .some((c) => c.name.startsWith('sb-') && c.name.includes('-auth-token'));
+
+    if (authCookie || hasSbToken) {
       return response;
     }
 
